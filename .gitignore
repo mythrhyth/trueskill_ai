@@ -7,4 +7,10 @@ venv/
 env/
 .venv/
 
-ARCHITECTURE.md
+
+skill_extraction_service/**/test/
+skill_extraction_service/**/tests/
+
+
+skill_extraction_service/**/output.txt
+skill_extraction_service/**/ARCHITECTURE.md
