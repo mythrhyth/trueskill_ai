@@ -14,3 +14,7 @@ skill_extraction_service/**/tests/
 
 skill_extraction_service/**/output.txt
 skill_extraction_service/**/ARCHITECTURE.md
+ingestor
+structured_json.txt
+tests
+demo
