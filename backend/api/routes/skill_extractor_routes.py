@@ -1,21 +1,18 @@
-"""API Routes for the Multi-Agent Intelligence Layer."""
+"""API Routes for Multi-Agent Intelligence Layer."""
 
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
-from backend.schema.skill_schema import ProcessingInput
-from backend.services.skill_extractor.orchestrator.pipeline import run_pipeline, run_quick_pipeline
-from backend.services.skill_extractor.agents import (
+from schema.skill_schema import ProcessingInput
+from services.skill_extractor.orchestrator.pipeline import run_pipeline
+from services.skill_extractor.agents import (
     preprocessing_agent,
     normalization_agent,
     metadata_agent,
-    extractor_agent,
     fusion_agent,
     scoring_agent
 )
 
-router = APIRouter(refix="/skill_extractor", tags=["skill_extractor"])
-
-
+router = APIRouter(prefix="/skill_extractor", tags=["skill_extractor"])
 
 
 @router.post("/extract", response_model=dict)
@@ -27,88 +24,13 @@ async def extract_skills(data: ProcessingInput):
     1. Preprocessing
     2. Normalization
     3. Metadata extraction
-    4. LLM-based extraction
-    5. Fusion
-    6. Scoring
+    4. Fusion
+    5. Scoring
     
     Returns: Structured skill profile with confidence scores
     """
     try:
         result = run_pipeline(data.model_dump())
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-@router.post("/preprocess", response_model=dict)
-async def preprocess(data: ProcessingInput):
-    """Stage 1: Clean raw data."""
-    try:
-        result = preprocessing_agent.run(data.model_dump())
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/normalize", response_model=dict)
-async def normalize(data: dict):
-    """Stage 2: Normalize terminology."""
-    try:
-        result = normalization_agent.run(data)
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/metadata", response_model=dict)
-async def extract_metadata(data: dict):
-    """Stage 3a: Extract skills from metadata/metrics."""
-    try:
-        result = metadata_agent.run(data)
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/extract-llm", response_model=dict)
-async def extract_llm(data: dict):
-    """Stage 3b: Extract skills using LLM reasoning."""
-    try:
-        result = extractor_agent.run(data)
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/fuse", response_model=dict)
-async def fuse_skills(data: dict):
-    """Stage 4: Fuse skills from multiple sources."""
-    try:
-        result = fusion_agent.run(data)
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/score", response_model=dict)
-async def score_skills(data: dict):
-    """Stage 5: Assign credibility scores."""
-    try:
-        result = scoring_agent.run(data)
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
         return result
