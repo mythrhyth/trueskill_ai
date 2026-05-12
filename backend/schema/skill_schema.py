@@ -41,6 +41,19 @@ class SkillExtractionOutput(BaseModel):
 
 
 class SkillResponse(BaseModel):
-    user_id: str
-    timestamp: str
-    skills: List[Skill]
+    user_id: Optional[str] = None
+    timestamp: Optional[str] = None
+    skills: List["SkillDetail"]
+
+
+class SkillDetail(BaseModel):
+    name: str
+    category: Optional[str] = None
+    confidence_score: float = Field(ge=0.0, le=100.0)
+    authenticity_score: float = Field(ge=0.0, le=100.0)
+    status: str
+    evidence: List[str] = []
+    level: Optional[str] = None
+    signals: List[Any] = []
+    source_count: int = 1
+    created_at: Optional[str] = None
