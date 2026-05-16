@@ -3,13 +3,13 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from services.ingestion.cp_parser import parse_cp_profile
-from services.ingestion.doc_parser import parse_document
-from services.ingestion.github_parser import parse_github
-from services.ingestion.kaggle_parser import parse_kaggle
-from services.ingestion.normalizer import normalize_item, normalize_user_schema
-from services.ingestion.research_parser import parse_research
-from services.ingestion.resume_parser import parse_resume
+from backend.services.ingestion.cp_parser import parse_cp_profile
+from backend.services.ingestion.doc_parser import parse_document
+from backend.services.ingestion.github_parser import parse_github
+from backend.services.ingestion.kaggle_parser import parse_kaggle
+from backend.services.ingestion.normalizer import normalize_item, normalize_user_schema
+from backend.services.ingestion.research_parser import parse_research
+from backend.services.ingestion.resume_parser import parse_resume
 
 router = APIRouter(prefix="/ingestion", tags=["ingestion"])
 

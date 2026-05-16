@@ -198,12 +198,8 @@ class ScoringAgent(BaseAgent):
         # Boost for multiple independent sources
         if len(set(sources)) >= 3:
             modifier *= 1.05
-        ) / max(total_weight, 1)
         
-        # Combine
-        signal_score = (avg_conf * 0.6 + weighted_avg * 0.4) + diversity_bonus
-        
-        return min(1.0, signal_score)
+        return modifier
 
 
 # Singleton instance

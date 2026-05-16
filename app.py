@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from backend.api.routes.ingestion_routes import router as ingestion_router
 from backend.api.routes.skill_extractor_routes import router as skill_extractor_router
+from backend.api.routes.validation_routes import router as validation_router
+from backend.api.routes.matching_routes import router as matching_router
 
 app = FastAPI(
     title="TrueSkill AI Ingestion API",
@@ -10,6 +12,8 @@ app = FastAPI(
 
 app.include_router(ingestion_router)
 app.include_router(skill_extractor_router)
+app.include_router(validation_router)
+app.include_router(matching_router)
 
 
 @app.get("/")
@@ -36,5 +40,9 @@ async def root():
             "/score",
             "/health",
             "/agents",
+            "/matching/calculate-score",
+            "/matching/match-jobs",
+            "/matching/graph/profile",
+            "/matching/profile-analysis",
         ],
     }

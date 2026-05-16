@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from schema.user_schema import Attributes, Content, Item, Links, Metrics, Timestamps, UserSchema
+from backend.schema.user_schema import Attributes, Content, Item, Links, Metrics, Timestamps, UserSchema
 
 
 def _to_int(value: Any) -> Optional[int]:

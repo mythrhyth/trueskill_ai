@@ -13,7 +13,7 @@ from backend.services.skill_extractor.agents import (
     scoring_agent
 )
 
-router = APIRouter(refix="/skill_extractor", tags=["skill_extractor"])
+router = APIRouter(prefix="/skill_extractor", tags=["skill_extractor"])
 
 
 

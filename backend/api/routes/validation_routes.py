@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Dict, Any, List
-from services.validation import validate_profile
+from backend.services.validation.validator import validate_profile
 
 router = APIRouter(prefix="/validation", tags=["validation"])
 
