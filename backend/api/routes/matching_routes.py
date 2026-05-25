@@ -10,6 +10,7 @@ from backend.services.scoring.scoring_engine import calculate_candidate_score
 from backend.services.matching.matching_engine import match_candidate_roles
 from backend.services.graph.graph_engine import build_skill_graph
 from backend.services.explainability.explainability_engine import generate_profile_explanation
+from backend.services.persistence.candidate_repository import save_candidate_result
 
 router = APIRouter(prefix="/matching", tags=["matching"])
 
@@ -72,6 +73,36 @@ async def analyze_profile(payload: Dict[str, Any]):
             validated_skills,
             [m.model_dump() for m in match_res.matched_roles]
         )
+        
+        # Safely persist candidate result in the database
+        try:
+            name = (
+                payload.get("name") or 
+                payload.get("profile_summary", {}).get("name") or 
+                payload.get("profile_summary", {}).get("username") or
+                user_id
+            )
+            extracted_skills = payload.get("extracted_skills") or payload.get("skills") or []
+            
+            candidate_data = {
+                "candidate_id": user_id,
+                "name": name,
+                "extracted_skills": extracted_skills,
+                "validated_skills": validated_skills,
+                "score": score_res.final_score,
+                "matched_roles": [m.model_dump() for m in match_res.matched_roles],
+                "analysis_summary": explanation_res.model_dump(),
+                "authenticity_metrics": {
+                    "score_breakdown": score_res.score_breakdown,
+                    "is_suspicious": payload.get("is_suspicious", False)
+                }
+            }
+            save_candidate_result(candidate_data)
+        except Exception as persist_err:
+            import logging
+            logging.getLogger("trueskill_persistence").error(
+                f"Failed to persist candidate results: {persist_err}", exc_info=True
+            )
         
         return CombinedAnalysisResponse(
             user_id=user_id,
