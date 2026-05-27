@@ -4,6 +4,7 @@ from backend.api.routes.skill_extractor_routes import router as skill_extractor_
 from backend.api.routes.validation_routes import router as validation_router
 from backend.api.routes.matching_routes import router as matching_router
 from backend.api.routes.recruiter_routes import router as recruiter_router
+from backend.api.routes.jobs_routes import router as jobs_router
 
 app = FastAPI(
     title="TrueSkill AI Ingestion API",
@@ -16,6 +17,7 @@ app.include_router(skill_extractor_router)
 app.include_router(validation_router)
 app.include_router(matching_router)
 app.include_router(recruiter_router)
+app.include_router(jobs_router)
 
 
 @app.get("/")
