@@ -179,6 +179,19 @@ class ScoringAgent(BaseAgent):
         final_score = avg_weighted_confidence + diversity_boost + evidence_quality
         return min(1.0, final_score)
     
+    def _assess_evidence_quality(self, signals: list) -> float:
+        """Assess the quality of evidence supporting the signals."""
+        if not signals:
+            return 0.0
+        quality_score = 0.0
+        for signal in signals:
+            evidence = signal.get("evidence", [])
+            if isinstance(evidence, list):
+                quality_score += min(0.1, len(evidence) * 0.05)
+            elif isinstance(evidence, str) and len(evidence) > 10:
+                quality_score += 0.05
+        return min(0.2, quality_score)
+        
     def _calculate_signal_score(self, signals: list) -> float:
         """Legacy method for backward compatibility."""
         return self._calculate_enhanced_signal_score(signals)

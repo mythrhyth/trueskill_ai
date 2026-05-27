@@ -38,4 +38,42 @@ export const api = {
     const response = await apiClient.post("/matching/profile-analysis", payload);
     return response.data;
   },
+
+  getCandidates: async () => {
+    const response = await apiClient.get("/recruiter/candidates");
+    return response.data;
+  },
+
+  getCandidateById: async (id: string) => {
+    const response = await apiClient.get(`/recruiter/candidate/${id}`);
+    return response.data;
+  },
+
+  getTopRanked: async () => {
+    const response = await apiClient.get("/recruiter/top-ranked");
+    return response.data;
+  },
+
+  filterCandidates: async (params: { skill?: string; domain?: string; minimum_score?: number }) => {
+    const response = await apiClient.get("/recruiter/filter", { params });
+    return response.data;
+  },
+
+  getJobRecommendations: async (candidateId: string) => {
+    const response = await apiClient.get(`/jobs/recommendations/${candidateId}`);
+    return response.data;
+  },
+
+  getRoleTemplates: async () => {
+    const response = await apiClient.get("/jobs/roles");
+    return response.data;
+  },
+
+  customMatch: async (candidateId: string, jobDescription: string) => {
+    const response = await apiClient.post("/jobs/custom-match", {
+      candidate_id: candidateId,
+      job_description: jobDescription,
+    });
+    return response.data;
+  },
 };

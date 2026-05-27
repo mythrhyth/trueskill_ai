@@ -29,6 +29,10 @@ export interface CandidateData {
   weaknesses: string[];
   hireConfidence: number;
   recommendedRoles: string[];
+  graph?: {
+    nodes: Array<{ id: string; label: string; type: string }>;
+    edges: Array<{ source: string; target: string; relation: string }>;
+  } | null;
 }
 
 export type ProfileStatus = "idle" | "loading" | "success" | "error";
@@ -39,6 +43,7 @@ interface ProfileState {
   error: string | null;
   data: CandidateData | null;
   profileUrl: string;
+  userId: string | null;
 
   setProfileUrl: (url: string) => void;
   submitProfile: () => Promise<void>;
@@ -107,6 +112,7 @@ const mapBackendToFrontendData = (
     weaknesses: analysisResp?.explanations?.weaknesses || [],
     hireConfidence: Math.round(analysisResp?.score?.final_score || 0),
     recommendedRoles: matchedRoles.map((r: any) => r.role),
+    graph: analysisResp?.graph || null,
   };
 };
 
@@ -116,10 +122,11 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   error: null,
   data: null,
   profileUrl: "",
+  userId: null,
 
   setProfileUrl: (url) => set({ profileUrl: url }),
 
-  reset: () => set({ status: "idle", currentStep: "", error: null, data: null, profileUrl: "" }),
+  reset: () => set({ status: "idle", currentStep: "", error: null, data: null, profileUrl: "", userId: null }),
 
   submitProfile: async () => {
     const { profileUrl } = get();
@@ -131,6 +138,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       // Step 1: Ingest Github Profile
       const ingestionRes = await api.ingestGithubProfile(profileUrl);
       const userId = ingestionRes?.user_id || "req_" + Math.random().toString(36).substring(2, 9);
+      set({ userId });
       const ingestedData = ingestionRes?.items || [ingestionRes];
 
       // Step 2: Extract Skills
