@@ -30,6 +30,7 @@ import {
   Heart,
 } from "lucide-react";
 import { useProfileStore } from "@/store/useProfileStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/services/api";
 
 export const Route = createFileRoute("/jobs")({
@@ -419,6 +420,7 @@ function getInitials(name: string): string {
 
 function JobsPage() {
   const { userId } = useProfileStore();
+  const { user } = useAuthStore();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [roles, setRoles] = useState<JobRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -501,14 +503,18 @@ function JobsPage() {
               insights: c.insights,
             }));
           }
-          setCandidatesList(list);
+          let filteredList = list;
+          if (user && user.role === 'recruiter') {
+            filteredList = list.filter(c => c.candidate_id !== user.id && c.email !== user.email && c.name !== user.name);
+          }
+          setCandidatesList(filteredList);
           setLoadingCandidates(false);
           
           // Determine initial selection
           if (userId) {
             setSelectedUserId(userId);
-          } else if (list.length > 0) {
-            setSelectedUserId(list[0].candidate_id);
+          } else if (filteredList.length > 0) {
+            setSelectedUserId(filteredList[0].candidate_id);
           }
         }
       })
@@ -534,13 +540,18 @@ function JobsPage() {
             photos: c.photos,
             insights: c.insights,
           }));
-          setCandidatesList(list);
+          
+          let filteredList = list;
+          if (user && user.role === 'recruiter') {
+            filteredList = list.filter(c => c.candidate_id !== user.id && c.email !== user.email && c.name !== user.name);
+          }
+          setCandidatesList(filteredList);
           setLoadingCandidates(false);
           
           if (userId) {
             setSelectedUserId(userId);
-          } else if (list.length > 0) {
-            setSelectedUserId(list[0].candidate_id);
+          } else if (filteredList.length > 0) {
+            setSelectedUserId(filteredList[0].candidate_id);
           }
         }
       });

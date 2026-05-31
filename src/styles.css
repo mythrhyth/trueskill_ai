@@ -234,5 +234,81 @@
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+@keyframes shimmer {
+  0% { left: -100%; }
+  50%, 100% { left: 200%; }
+}
 .animate-float { animation: float 6s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.shimmer-overlay {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2.8s ease-in-out infinite;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+.hover-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-foreground) 0%,
+    color-mix(in oklab, var(--color-foreground) 40%, var(--indigo)) 25%,
+    var(--color-foreground) 50%,
+    color-mix(in oklab, var(--color-foreground) 40%, var(--indigo)) 75%,
+    var(--color-foreground) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: text-shimmer-anim 3s linear infinite;
+  transition: all 0.3s ease;
+}
+.hover-text-shimmer * {
+  background: inherit !important;
+  -webkit-background-clip: inherit !important;
+  background-clip: inherit !important;
+  color: inherit !important;
+}
+.hover-text-shimmer:hover,
+.hover-text-shimmer:hover * {
+  background: linear-gradient(
+    90deg,
+    var(--indigo) 0%,
+    color-mix(in oklab, var(--indigo) 60%, white) 25%,
+    var(--purple) 50%,
+    var(--cyan) 75%,
+    var(--indigo) 100%
+  ) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  animation: text-shimmer-anim 1.5s linear infinite !important;
+}
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-foreground) 0%,
+    color-mix(in oklab, var(--indigo) 80%, white) 25%,
+    var(--color-foreground) 50%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-shimmer-anim 3s linear infinite;
+}
+@keyframes text-shimmer-anim {
+  to {
+    background-position: 200% center;
+  }
+}

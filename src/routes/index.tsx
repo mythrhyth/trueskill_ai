@@ -137,7 +137,7 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="mt-6 text-5xl font-bold tracking-tight text-foreground md:text-7xl"
+            className="mt-6 text-5xl font-bold tracking-tight text-foreground md:text-7xl hover-text-shimmer cursor-default"
           >
             Beyond Resumes.<br />
             <span className="gradient-text">Discover Real Skills.</span>

@@ -184,8 +184,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         validated_skills: validatedSkills,
       };
 
-      // Inject auth user identity into the payload so backend can persist real name
-      if (authUser) {
+      // Inject auth user identity into the payload so backend can persist real name only if candidate
+      if (authUser && authUser.role === 'candidate') {
         analysisPayload.name = authUser.name;
         analysisPayload.email = authUser.email;
         analysisPayload.role = authUser.role;
@@ -195,14 +195,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const analysisRes = await api.analyzeProfile(analysisPayload);
       console.log('[ProfileStore] analyzeProfile response:', analysisRes);
 
-      // Transform data — always use auth user identity as primary source
+      // Transform data — always use auth user identity as primary source if candidate
       const mappedData = mapBackendToFrontendData(
         extractRes,
         validateRes,
         analysisRes,
-        authUser?.name,
-        authUser?.email,
-        authUser?.role
+        authUser?.role === 'candidate' ? authUser?.name : undefined,
+        authUser?.role === 'candidate' ? authUser?.email : undefined,
+        authUser?.role === 'candidate' ? authUser?.role : undefined
       );
 
       console.log('[ProfileStore] Final mapped data name:', mappedData.name);

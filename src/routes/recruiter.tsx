@@ -395,15 +395,26 @@ function RecruiterDashboard() {
     try {
       const data = await api.getCandidates();
       if (data && data.length > 0) {
-        const mapped = (data || []).map((c: any) => mapBackendCandidate(c));
+        let mapped: Candidate[] = (data || []).map((c: any) => mapBackendCandidate(c));
+        if (user && user.role === 'recruiter') {
+          mapped = mapped.filter((c: Candidate) => c.id !== user.id && c.email !== user.email && c.name !== user.name);
+        }
         setCandidates(mapped);
       } else {
-        setCandidates(PRE_SEEDED_CANDIDATES);
+        let seeded = PRE_SEEDED_CANDIDATES;
+        if (user && user.role === 'recruiter') {
+          seeded = seeded.filter(c => c.id !== user.id && c.email !== user.email && c.name !== user.name);
+        }
+        setCandidates(seeded);
       }
     } catch (err: any) {
       console.error("Failed to fetch recruiter candidates:", err);
       setError("Failed to connect to backend candidate database. Falling back to pre-seeded profiles.");
-      setCandidates(PRE_SEEDED_CANDIDATES);
+      let seeded = PRE_SEEDED_CANDIDATES;
+      if (user && user.role === 'recruiter') {
+        seeded = seeded.filter(c => c.id !== user.id && c.email !== user.email && c.name !== user.name);
+      }
+      setCandidates(seeded);
     } finally {
       setLoading(false);
     }
@@ -436,9 +447,14 @@ function RecruiterDashboard() {
     }
   };
 
-  const filtered = candidates.filter(c =>
-    `${c.name} ${c.role} ${c.skills.join(" ")}`.toLowerCase().includes(q.toLowerCase())
-  );
+  const filtered = candidates.filter(c => {
+    if (user && user.role === 'recruiter') {
+      if (c.id === user.id || c.email === user.email || c.name === user.name) {
+        return false;
+      }
+    }
+    return `${c.name} ${c.role} ${c.skills.join(" ")}`.toLowerCase().includes(q.toLowerCase());
+  });
 
   // Debug log
   console.log('[RecruiterDashboard] candidates loaded:', candidates.length, '| filtered:', filtered.length);

@@ -23,7 +23,7 @@ export function PageHeader({
             {eyebrow}
           </span>
         )}
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl hover-text-shimmer cursor-default">{title}</h1>
         {description && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
