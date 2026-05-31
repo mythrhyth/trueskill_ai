@@ -6,6 +6,7 @@ import {
   Check, X, Star, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InteractiveBackground } from "@/components/ui/InteractiveBackground";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -80,9 +81,10 @@ function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden pt-32 pb-24">
-        <div className="absolute inset-0 gradient-mesh opacity-70" />
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-        <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--purple)]/20 blur-[120px]" />
+        <InteractiveBackground />
+        <div className="absolute inset-0 gradient-mesh opacity-70 pointer-events-none" />
+        <div className="absolute inset-0 grid-pattern opacity-30 pointer-events-none" />
+        <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--purple)]/20 blur-[120px] pointer-events-none" />
 
         {/* floating glowing spheres */}
         <motion.div
@@ -180,7 +182,7 @@ function Landing() {
             <div className="relative">
               {/* Background glow for the cards */}
               <div className="absolute inset-0 bg-gradient-to-r from-[var(--indigo)]/20 via-[var(--cyan)]/20 to-[var(--purple)]/20 blur-3xl rounded-[3rem]" />
-              
+
               <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { title: "Evidence-Backed Skill Verification", icon: ShieldCheck, color: "var(--success)" },
@@ -195,7 +197,7 @@ function Landing() {
                   >
                     {/* Animated gradient border effect on hover */}
                     <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 via-[var(--cyan)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
+
                     <div className="relative flex h-full items-center gap-4 rounded-xl bg-gradient-to-br from-card/50 to-transparent p-5 border border-border/20">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card/85 border border-border/40 shadow-sm group-hover:bg-card transition-colors">
                         <card.icon className="h-6 w-6" style={{ color: card.color }} />
