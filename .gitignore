@@ -36,3 +36,6 @@ __pycache__/
 *.pyc
 .env
 *.db
+
+# Local test/scratch scripts
+e2e_test.py

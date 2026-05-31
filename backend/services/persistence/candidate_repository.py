@@ -39,6 +39,8 @@ def save_candidate_result(data: dict) -> bool:
             return False
 
         name = data.get("name", "Unknown Candidate")
+        email = data.get("email", "unknown@example.com")
+        role = data.get("role", "Software Engineer")
         extracted_skills = serialize_json_field(data.get("extracted_skills", []))
         validated_skills = serialize_json_field(data.get("validated_skills", []))
         score = float(data.get("score", 0.0))
@@ -52,10 +54,12 @@ def save_candidate_result(data: dict) -> bool:
             # Construct the UPSERT SQL
             query = f"""
             INSERT INTO candidate_results (
-                candidate_id, name, extracted_skills, validated_skills, score, matched_roles, analysis_summary, authenticity_metrics
-            ) VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+                candidate_id, name, email, role, extracted_skills, validated_skills, score, matched_roles, analysis_summary, authenticity_metrics
+            ) VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
             ON CONFLICT(candidate_id) DO UPDATE SET
                 name = EXCLUDED.name,
+                email = EXCLUDED.email,
+                role = EXCLUDED.role,
                 extracted_skills = EXCLUDED.extracted_skills,
                 validated_skills = EXCLUDED.validated_skills,
                 score = EXCLUDED.score,
@@ -70,6 +74,8 @@ def save_candidate_result(data: dict) -> bool:
                 cursor.execute(query, (
                     candidate_id,
                     name,
+                    email,
+                    role,
                     extracted_skills,
                     validated_skills,
                     score,
@@ -97,7 +103,7 @@ def get_candidate_result(candidate_id: str) -> dict:
             placeholder = "%s" if is_postgres else "?"
             query = f"""
             SELECT 
-                candidate_id, name, extracted_skills, validated_skills, 
+                candidate_id, name, email, role, extracted_skills, validated_skills, 
                 score, matched_roles, analysis_summary, authenticity_metrics, created_at 
             FROM candidate_results 
             WHERE candidate_id = {placeholder}
@@ -109,7 +115,7 @@ def get_candidate_result(candidate_id: str) -> dict:
                 row = cursor.fetchone()
                 if row:
                     # Parse timestamp if it is returned as datetime object or string
-                    created_at_val = row[8]
+                    created_at_val = row[10]
                     if hasattr(created_at_val, "isoformat"):
                         created_at_val = created_at_val.isoformat()
                     else:
@@ -118,12 +124,14 @@ def get_candidate_result(candidate_id: str) -> dict:
                     return {
                         "candidate_id": row[0],
                         "name": row[1],
-                        "extracted_skills": deserialize_json_field(row[2]),
-                        "validated_skills": deserialize_json_field(row[3]),
-                        "score": row[4],
-                        "matched_roles": deserialize_json_field(row[5]),
-                        "analysis_summary": deserialize_json_field(row[6]),
-                        "authenticity_metrics": deserialize_json_field(row[7]),
+                        "email": row[2],
+                        "role": row[3],
+                        "extracted_skills": deserialize_json_field(row[4]),
+                        "validated_skills": deserialize_json_field(row[5]),
+                        "score": row[6],
+                        "matched_roles": deserialize_json_field(row[7]),
+                        "analysis_summary": deserialize_json_field(row[8]),
+                        "authenticity_metrics": deserialize_json_field(row[9]),
                         "created_at": created_at_val
                     }
             finally:
@@ -131,8 +139,8 @@ def get_candidate_result(candidate_id: str) -> dict:
     except Exception as e:
         logger.error(f"Failed to get candidate result from database: {e}", exc_info=True)
     return None
-
-
+ 
+ 
 def list_candidate_results() -> list:
     """
     Lists all candidate results from the database ordered by creation date descending.
@@ -142,7 +150,7 @@ def list_candidate_results() -> list:
         with get_db_connection() as (conn, is_postgres):
             query = """
             SELECT 
-                candidate_id, name, extracted_skills, validated_skills, 
+                candidate_id, name, email, role, extracted_skills, validated_skills, 
                 score, matched_roles, analysis_summary, authenticity_metrics, created_at 
             FROM candidate_results 
             ORDER BY created_at DESC
@@ -152,21 +160,23 @@ def list_candidate_results() -> list:
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 for row in rows:
-                    created_at_val = row[8]
+                    created_at_val = row[10]
                     if hasattr(created_at_val, "isoformat"):
                         created_at_val = created_at_val.isoformat()
                     else:
                         created_at_val = str(created_at_val)
-
+ 
                     results.append({
                         "candidate_id": row[0],
                         "name": row[1],
-                        "extracted_skills": deserialize_json_field(row[2]),
-                        "validated_skills": deserialize_json_field(row[3]),
-                        "score": row[4],
-                        "matched_roles": deserialize_json_field(row[5]),
-                        "analysis_summary": deserialize_json_field(row[6]),
-                        "authenticity_metrics": deserialize_json_field(row[7]),
+                        "email": row[2],
+                        "role": row[3],
+                        "extracted_skills": deserialize_json_field(row[4]),
+                        "validated_skills": deserialize_json_field(row[5]),
+                        "score": row[6],
+                        "matched_roles": deserialize_json_field(row[7]),
+                        "analysis_summary": deserialize_json_field(row[8]),
+                        "authenticity_metrics": deserialize_json_field(row[9]),
                         "created_at": created_at_val
                     })
             finally:

@@ -14,9 +14,17 @@ def map_to_recruiter_candidate(cand: dict) -> dict:
     sorted_skills = sorted(validated_skills, key=lambda s: s.get("validated_score", 0.0), reverse=True)
     top_skills = [s.get("name") for s in sorted_skills if s.get("name")]
     
+    # Cleanup name if null, empty, or starts with req_ (unless it matches a seeded ID)
+    name = cand.get("name")
+    if not name or name.strip() == "" or name.startswith("req_"):
+        name = "Unknown User"
+        
     return {
+        "id": cand.get("candidate_id"),
         "candidate_id": cand.get("candidate_id"),
-        "name": cand.get("name", "Unknown Candidate"),
+        "name": name,
+        "email": cand.get("email") or "unknown@example.com",
+        "role": cand.get("role") or "Software Engineer",
         "score": cand.get("score", 0.0),
         "top_skills": top_skills,
         "authenticity_metrics": cand.get("authenticity_metrics") or {},
@@ -43,6 +51,16 @@ async def get_candidate(id: str):
         candidate = get_candidate_result(id)
         if not candidate:
             raise HTTPException(status_code=404, detail=f"Candidate with ID '{id}' not found.")
+            
+        # Enforce name cleanup/fallback
+        name = candidate.get("name")
+        if not name or name.strip() == "" or name.startswith("req_"):
+            name = "Unknown User"
+            
+        candidate["id"] = candidate.get("candidate_id")
+        candidate["name"] = name
+        candidate["email"] = candidate.get("email") or "unknown@example.com"
+        candidate["role"] = candidate.get("role") or "Software Engineer"
         return candidate
     except HTTPException:
         raise

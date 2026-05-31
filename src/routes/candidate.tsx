@@ -45,7 +45,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 30 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-card/80 shadow-2xl elegant-shadow backdrop-blur-2xl"
+          className="relative flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-border bg-card shadow-2xl elegant-shadow backdrop-blur-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Futuristic background elements */}
@@ -55,10 +55,10 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
           <div className="absolute inset-0 grid-pattern opacity-10 pointer-events-none" />
           
           {/* Header */}
-          <div className="relative flex items-center justify-between border-b border-white/5 bg-background/40 px-8 py-6 backdrop-blur-md">
+          <div className="relative flex items-center justify-between border-b border-border/40 bg-background/40 px-8 py-6 backdrop-blur-md">
             <div className="flex items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary text-white shadow-lg shadow-[var(--indigo)]/20 relative group">
-                <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 rounded-2xl bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Code2 className="h-7 w-7" />
               </div>
               <div>
@@ -77,7 +77,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
             </div>
             <button 
               onClick={onClose}
-              className="rounded-full bg-white/5 p-3 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all duration-300"
+              className="rounded-full bg-muted/40 p-3 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-300 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -106,7 +106,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
                 <div className="grid gap-4 sm:grid-cols-2">
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="rounded-2xl border border-white/5 bg-card/40 p-6 backdrop-blur-sm"
+                    className="rounded-2xl border border-border/40 bg-card/40 p-6 backdrop-blur-sm"
                   >
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Depth of Knowledge</h3>
                     <div className="flex items-end gap-2 mb-2">
@@ -149,7 +149,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
                     <Activity className="h-4 w-4" /> Contribution Timeline
                   </h3>
-                  <div className="h-32 rounded-2xl border border-white/5 bg-card/40 p-4 flex items-end gap-1 overflow-hidden">
+                  <div className="h-32 rounded-2xl border border-border/40 bg-card/40 p-4 flex items-end gap-1 overflow-hidden">
                     {/* Mock timeline bars based on skill length */}
                     {Array.from({ length: 30 }).map((_, i) => {
                       const height = Math.random() * 80 + 20;
@@ -171,7 +171,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
               <div className="lg:col-span-5 space-y-6">
                 <motion.div 
                   initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-                  className="rounded-3xl border border-white/5 bg-card/60 p-6 sm:p-8 h-full backdrop-blur-md"
+                  className="rounded-3xl border border-border/40 bg-card/60 p-6 sm:p-8 h-full backdrop-blur-md"
                 >
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6 flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-[var(--success)]" /> Why This Skill Is Trusted
@@ -197,7 +197,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
                     ))}
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-white/5">
+                  <div className="mt-8 pt-6 border-t border-border/40">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Detected Sources</h3>
                     <div className="flex flex-wrap gap-2">
                       {skill.sources.map((src: string, i: number) => (
@@ -205,7 +205,7 @@ function SkillProofModal({ skill, onClose }: { skill: any, onClose: () => void }
                           key={src} 
                           initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 + i * 0.1 }}
                         >
-                          <Badge variant="secondary" className="px-3 py-1.5 text-xs bg-muted/50 hover:bg-muted transition-colors border border-white/5">
+                          <Badge variant="secondary" className="px-3 py-1.5 text-xs bg-muted/50 hover:bg-muted transition-colors border border-border/40">
                             <span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)] mr-2 animate-pulse" />
                             {src}
                           </Badge>
@@ -229,7 +229,7 @@ function SkillCard({ skill, index, onOpenModal }: { skill: any, index: number, o
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + (index * 0.05) }}
-      className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 bg-card/60 backdrop-blur-sm cursor-pointer group ${expanded ? 'border-[var(--indigo)]/50 shadow-[0_0_15px_rgba(var(--indigo-rgb),0.15)] scale-[1.02]' : 'hover:border-white/20 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1'}`}
+      className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 bg-card/60 backdrop-blur-sm cursor-pointer group ${expanded ? 'border-primary/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.15)] scale-[1.02]' : 'hover:border-border hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1'}`}
       onClick={() => onOpenModal(skill)}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -254,7 +254,7 @@ function SkillCard({ skill, index, onOpenModal }: { skill: any, index: number, o
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
         <div className="flex gap-1.5">
           {skill.sources.map((src: string) => (
-            <span key={src} className="rounded-md border border-white/5 bg-background/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground shadow-sm">{src}</span>
+            <span key={src} className="rounded-md border border-border/40 bg-background/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground shadow-sm">{src}</span>
           ))}
         </div>
         <div className="flex items-center gap-1 text-[10px] font-semibold text-[var(--success)]">
@@ -419,8 +419,8 @@ function CandidatePage() {
           >
             <PageHeader
               eyebrow="AI-Generated Recruiter Insights"
-              title="Verified Candidate Intelligence"
-              description={`Explainable hiring intelligence extracted from ${profileUrl}`}
+              title={data.name && data.name !== "Unknown User" ? data.name : (user?.name || data.name)}
+              description={`Verified ${data.role || user?.role || 'Software Engineer'} profile dynamically compiled from ${profileUrl}`}
               actions={
                 <>
                   <Button onClick={() => submitProfile()} variant="outline" size="sm">
@@ -453,7 +453,7 @@ function CandidatePage() {
 
                 <div className="grid gap-8 lg:grid-cols-12 relative z-10">
                   {/* Left: Hire Confidence (Centerpiece) */}
-                  <div className="lg:col-span-4 flex flex-col items-center justify-center space-y-6 rounded-3xl bg-card/40 p-8 border border-white/10 backdrop-blur-md shadow-2xl relative overflow-hidden group-hover:border-[var(--indigo)]/30 transition-colors">
+                  <div className="lg:col-span-4 flex flex-col items-center justify-center space-y-6 rounded-3xl bg-card/40 p-8 border border-border/40 backdrop-blur-md shadow-2xl relative overflow-hidden group-hover:border-primary/30 transition-colors">
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--indigo)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
                     <div className="text-center relative">
@@ -474,7 +474,7 @@ function CandidatePage() {
                   <div className="lg:col-span-8 space-y-6">
                     <motion.p 
                       initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-                      className="text-base text-foreground leading-relaxed bg-card/60 p-5 rounded-2xl border border-white/5 backdrop-blur-sm shadow-sm"
+                      className="text-base text-foreground leading-relaxed bg-card/60 p-5 rounded-2xl border border-border/40 backdrop-blur-sm shadow-sm"
                     >
                       <span className="font-serif text-3xl leading-none text-[var(--indigo)] opacity-50 mr-2">"</span>
                       {data.hiringSummary}

@@ -95,11 +95,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'system';
+                  var isDark = false;
+                  if (theme === 'dark') {
+                    isDark = true;
+                  } else if (theme === 'system') {
+                    isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  }
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `
+          }}
+        />
       </head>
       <body>
         {children}
@@ -114,9 +138,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <ThemeProvider>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

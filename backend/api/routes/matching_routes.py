@@ -82,11 +82,19 @@ async def analyze_profile(payload: Dict[str, Any]):
                 payload.get("profile_summary", {}).get("username") or
                 user_id
             )
+            if not name or name.strip() == "" or name.startswith("req_"):
+                name = "Unknown User"
+                
+            email = payload.get("email") or payload.get("profile_summary", {}).get("email") or "unknown@example.com"
+            role = payload.get("role") or (match_res.matched_roles[0].role if match_res.matched_roles else "Software Engineer")
+            
             extracted_skills = payload.get("extracted_skills") or payload.get("skills") or []
             
             candidate_data = {
                 "candidate_id": user_id,
                 "name": name,
+                "email": email,
+                "role": role,
                 "extracted_skills": extracted_skills,
                 "validated_skills": validated_skills,
                 "score": score_res.final_score,
@@ -106,6 +114,9 @@ async def analyze_profile(payload: Dict[str, Any]):
         
         return CombinedAnalysisResponse(
             user_id=user_id,
+            name=name,
+            email=email,
+            role=role,
             score=score_res,
             matched_roles=match_res.matched_roles,
             graph=graph_res,

@@ -124,4 +124,6 @@ class Item(BaseModel):
 class UserSchema(BaseModel):
     user_id: str
     timestamp: str
+    name: Optional[str] = None
+    email: Optional[str] = None
     items: List[Item]

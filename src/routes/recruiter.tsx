@@ -30,23 +30,57 @@ function scoreColor(n: number) {
   return "text-[var(--warning)]";
 }
 
+export function getAvatarInitials(name: string | null | undefined): string {
+  if (!name || name.trim() === "" || name === "Unknown User" || name === "Unknown Candidate") {
+    return "UU";
+  }
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  const firstInitial = parts[0][0] || "";
+  const lastInitial = parts[parts.length - 1][0] || "";
+  return (firstInitial + lastInitial).toUpperCase();
+}
+
+/** Returns true when the stored name is just the internal req_* ID */
+function isIdName(name: string | undefined | null): boolean {
+  if (!name) return true;
+  return /^req_[a-z0-9]+$/i.test(name.trim());
+}
+
+function getDisplayName(c: any): string {
+  if (!isIdName(c.name)) return c.name;
+  // Fallback: try email prefix
+  if (c.email && !c.email.startsWith('unknown')) {
+    return c.email.split('@')[0].split(/[._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+  return "Unknown User";
+}
+
+function getInitials(name: string): string {
+  if (!name || name === "Unknown User") return "UU";
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
 function mapBackendCandidate(c: any): Candidate {
   const scoreBreakdown = c.authenticity_metrics?.score_breakdown || {};
   const topMatch = c.matched_roles?.[0] || {};
-  const initials = c.name
-    ? c.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
-    : "C";
-    
+  const displayName = getDisplayName(c);
+  console.log('[RecruiterDashboard] candidate_id:', c.candidate_id, '| raw name:', c.name, '| display name:', displayName);
+
   return {
     id: c.candidate_id,
-    name: c.name || "Unknown Candidate",
+    name: displayName,
     role: topMatch.role || "Software Engineer",
     score: Math.round((c.score || 0) * 10),
     auth: Math.round((scoreBreakdown.authenticity || 9.0) * 10),
     match: Math.round((topMatch.similarity || 0.85) * 100),
     skills: c.top_skills || [],
     rec: topMatch.role || "Software Engineer",
-    avatar: initials,
+    avatar: getInitials(displayName),
     analysisSummary: c.analysis_summary || null
   };
 }
@@ -102,9 +136,12 @@ function RecruiterDashboard() {
     }
   };
 
-  const filtered = candidates.filter(c => 
+  const filtered = candidates.filter(c =>
     `${c.name} ${c.role} ${c.skills.join(" ")}`.toLowerCase().includes(q.toLowerCase())
   );
+
+  // Debug log
+  console.log('[RecruiterDashboard] candidates loaded:', candidates.length, '| filtered:', filtered.length);
 
   // Dynamic statistics calculations based on live database candidates
   const candidateCount = candidates.length;
@@ -177,7 +214,7 @@ function RecruiterDashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-3 font-medium">Candidate</th>
+                    <th className="px-4 py-3 font-medium">User Name</th>
                     <th className="px-4 py-3 font-medium">Score</th>
                     <th className="px-4 py-3 font-medium">Authenticity</th>
                     <th className="px-4 py-3 font-medium">Match %</th>

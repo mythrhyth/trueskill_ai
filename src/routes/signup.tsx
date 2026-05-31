@@ -22,20 +22,22 @@ function SignUp() {
     const formData = new FormData(e.currentTarget);
     const name = formData.get("fullName") as string;
     const email = formData.get("email") as string;
-    
-    login({ name, email, role });
+    const id = `user_${Date.now()}`;
+
+    console.log('[SignUp] Registering user:', { id, name, email, role });
+    login({ id, name, email, role });
     navigate({ to: role === "candidate" ? "/candidate" : "/recruiter" });
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-white selection:bg-[var(--cyan)] selection:text-black">
+    <div className="relative min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       {/* Cinematic Background */}
       <div className="fixed inset-0 gradient-mesh opacity-70" />
       <div className="fixed inset-0 grid-pattern opacity-30" />
       
       {/* Animated Glow Orbs */}
       <motion.div
-        className="fixed -top-40 right-[-10%] h-[600px] w-[600px] rounded-full bg-[var(--purple)]/20 blur-[120px]"
+        className="fixed -top-40 right-[-10%] h-[600px] w-[600px] rounded-full bg-[var(--primary)]/20 blur-[120px]"
         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -57,10 +59,10 @@ function SignUp() {
           <Link to="/" className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary shadow-xl hover:scale-105 transition-transform duration-300">
             <Brain className="h-8 w-8 text-white" />
           </Link>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#1E1B4B] mb-3">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-3">
             Join the Elite
           </h1>
-          <p className="text-[#5B6475] max-w-md text-sm sm:text-base font-medium">
+          <p className="text-muted-foreground max-w-md text-sm sm:text-base font-medium">
             Create an account to access TrueSkill AI's verified hiring ecosystem.
           </p>
         </motion.div>
@@ -72,14 +74,14 @@ function SignUp() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="w-full max-w-2xl"
         >
-          <div className="rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/40 p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+          <div className="rounded-[2rem] bg-card/85 backdrop-blur-2xl border border-border/40 p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.06)] relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-card/30 to-transparent pointer-events-none" />
             
             <form onSubmit={handleSignUp} className="relative z-10 space-y-10">
               
               {/* Role Selection */}
               <div className="space-y-4">
-                <Label className="text-sm font-bold text-[#334155] uppercase tracking-widest ml-1">Select Your Role</Label>
+                <Label className="text-sm font-bold text-muted-foreground uppercase tracking-widest ml-1">Select Your Role</Label>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { id: "candidate", title: "Candidate", desc: "Build your verified profile", icon: User },
@@ -90,50 +92,50 @@ function SignUp() {
                       onClick={() => setRole(r.id as any)}
                       className={`relative cursor-pointer rounded-2xl border p-5 transition-all duration-300 flex flex-col gap-3 overflow-hidden group ${
                         role === r.id 
-                          ? 'border-[var(--indigo)]/60 bg-white shadow-lg' 
-                          : 'border-black/5 bg-black/5 hover:bg-black/10'
+                          ? 'border-primary bg-card shadow-lg' 
+                          : 'border-border bg-muted hover:bg-muted/80'
                       }`}
                     >
                       {role === r.id && (
-                        <motion.div layoutId="role-active" className="absolute inset-0 bg-gradient-to-br from-[var(--indigo)]/5 to-transparent pointer-events-none" />
+                        <motion.div layoutId="role-active" className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
                       )}
-                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${role === r.id ? 'bg-[var(--indigo)] text-white' : 'bg-black/10 text-[#5B6475]'}`}>
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${role === r.id ? 'bg-primary text-white' : 'bg-background text-muted-foreground'}`}>
                         <r.icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className={`font-bold transition-colors ${role === r.id ? 'text-[#1E1B4B]' : 'text-[#5B6475]'}`}>{r.title}</h3>
-                        <p className={`text-xs mt-1 font-medium transition-colors ${role === r.id ? 'text-[#475569]' : 'text-[#94A3B8]'}`}>{r.desc}</p>
+                        <h3 className={`font-bold transition-colors ${role === r.id ? 'text-foreground' : 'text-muted-foreground'}`}>{r.title}</h3>
+                        <p className={`text-xs mt-1 font-medium transition-colors ${role === r.id ? 'text-muted-foreground' : 'text-muted-foreground/80'}`}>{r.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="h-px w-full bg-black/5" />
+              <div className="h-px w-full bg-border" />
 
               {/* Basic Details */}
               <div className="space-y-5">
-                <h3 className="text-lg font-bold text-[#1E1B4B]">Account Details</h3>
+                <h3 className="text-lg font-bold text-foreground">Account Details</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-1.5 relative group">
-                    <Label htmlFor="fullName" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">Full Name</Label>
+                    <Label htmlFor="fullName" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Full Name</Label>
                     <div className="relative flex items-center">
-                      <User className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                      <Input id="fullName" name="fullName" placeholder="Jane Doe" required className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                      <User className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input id="fullName" name="fullName" placeholder="Jane Doe" required className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                     </div>
                   </div>
                   <div className="space-y-1.5 relative group">
-                    <Label htmlFor="email" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">Email</Label>
+                    <Label htmlFor="email" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Email</Label>
                     <div className="relative flex items-center">
-                      <Mail className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                      <Input id="email" name="email" type="email" placeholder="jane@example.com" required className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                      <Mail className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input id="email" name="email" type="email" placeholder="jane@example.com" required className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                     </div>
                   </div>
                   <div className="space-y-1.5 relative group sm:col-span-2">
-                    <Label htmlFor="password" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">Password</Label>
+                    <Label htmlFor="password" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Password</Label>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                      <Input id="password" type="password" placeholder="Create a strong password" required className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                      <Lock className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input id="password" type="password" placeholder="Create a strong password" required className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                     </div>
                   </div>
                 </div>
@@ -148,70 +150,70 @@ function SignUp() {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden space-y-10"
                   >
-                    <div className="h-px w-full bg-black/5" />
+                    <div className="h-px w-full bg-border" />
                     
                     {/* Academic Profile */}
                     <div className="space-y-5">
-                      <h3 className="text-lg font-bold text-[#1E1B4B]">Academic Profile</h3>
+                      <h3 className="text-lg font-bold text-foreground">Academic Profile</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="space-y-1.5 group sm:col-span-2">
-                          <Label className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">University / College</Label>
+                          <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">University / College</Label>
                           <Select>
-                            <SelectTrigger className="h-12 bg-white/20 border-white/30 text-[#1E293B] rounded-xl focus:ring-[var(--indigo)] shadow-inner">
+                            <SelectTrigger className="h-12 bg-background/40 border-border text-foreground rounded-xl focus:ring-primary shadow-inner">
                               <SelectValue placeholder="Select your institution" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-xl border-black/5 text-[#1E293B] rounded-xl font-medium">
-                              <SelectItem value="stanford">Stanford University</SelectItem>
-                              <SelectItem value="mit">Massachusetts Institute of Technology</SelectItem>
-                              <SelectItem value="berkeley">UC Berkeley</SelectItem>
-                              <SelectItem value="cmu">Carnegie Mellon University</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
+                            <SelectContent className="bg-card border-border text-foreground rounded-xl font-medium">
+                              <SelectItem value="stanford" className="cursor-pointer">Stanford University</SelectItem>
+                              <SelectItem value="mit" className="cursor-pointer">Massachusetts Institute of Technology</SelectItem>
+                              <SelectItem value="berkeley" className="cursor-pointer">UC Berkeley</SelectItem>
+                              <SelectItem value="cmu" className="cursor-pointer">Carnegie Mellon University</SelectItem>
+                              <SelectItem value="other" className="cursor-pointer">Other</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1.5 relative group">
-                          <Label htmlFor="branch" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">Branch / Department</Label>
+                          <Label htmlFor="branch" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Branch / Department</Label>
                           <div className="relative flex items-center">
-                            <Building className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                            <Input id="branch" placeholder="e.g. Computer Science" className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                            <Building className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input id="branch" placeholder="e.g. Computer Science" className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                           </div>
                         </div>
                         <div className="space-y-1.5 relative group">
-                          <Label htmlFor="gradYear" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">Graduation Year</Label>
+                          <Label htmlFor="gradYear" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Graduation Year</Label>
                           <div className="relative flex items-center">
-                            <GraduationCap className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                            <Input id="gradYear" placeholder="2026" className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                            <GraduationCap className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input id="gradYear" placeholder="2026" className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="h-px w-full bg-black/5" />
+                    <div className="h-px w-full bg-border" />
 
                     {/* Professional Links */}
                     <div className="space-y-5">
-                      <h3 className="text-lg font-bold text-[#1E1B4B]">Verification Sources</h3>
+                      <h3 className="text-lg font-bold text-foreground">Verification Sources</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="space-y-1.5 relative group">
-                          <Label htmlFor="github" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">GitHub Profile</Label>
+                          <Label htmlFor="github" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">GitHub Profile</Label>
                           <div className="relative flex items-center">
-                            <Github className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                            <Input id="github" placeholder="github.com/username" className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                            <Github className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input id="github" placeholder="github.com/username" className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                           </div>
                         </div>
                         <div className="space-y-1.5 relative group">
-                          <Label htmlFor="linkedin" className="text-xs font-bold text-[#334155] uppercase tracking-wider ml-1">LinkedIn URL</Label>
+                          <Label htmlFor="linkedin" className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">LinkedIn URL</Label>
                           <div className="relative flex items-center">
-                            <Linkedin className="absolute left-3 h-4 w-4 text-[#94A3B8] group-focus-within:text-[#1E1B4B] transition-colors" />
-                            <Input id="linkedin" placeholder="linkedin.com/in/username" className="pl-10 h-12 bg-white/20 border-white/30 text-[#1E293B] placeholder-[#94A3B8] focus-visible:ring-[var(--indigo)] rounded-xl shadow-inner" />
+                            <Linkedin className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input id="linkedin" placeholder="linkedin.com/in/username" className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                           </div>
                         </div>
-                        <div className="sm:col-span-2 mt-2 border border-dashed border-[#94A3B8]/30 rounded-xl p-6 bg-black/[0.02] hover:bg-black/[0.05] transition-colors flex flex-col items-center justify-center cursor-pointer group shadow-sm">
-                          <div className="h-12 w-12 rounded-full bg-black/5 border border-black/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <UploadCloud className="h-6 w-6 text-[#5B6475] group-hover:text-[var(--indigo)] transition-colors" />
+                        <div className="sm:col-span-2 mt-2 border border-dashed border-border rounded-xl p-6 bg-muted/40 hover:bg-muted/60 transition-colors flex flex-col items-center justify-center cursor-pointer group shadow-sm">
+                          <div className="h-12 w-12 rounded-full bg-background border border-border flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <UploadCloud className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
-                          <p className="text-sm font-bold text-[#24304A]">Upload Resume (Optional)</p>
-                          <p className="text-xs text-[#94A3B8] mt-1 font-medium">PDF, DOCX up to 5MB</p>
+                          <p className="text-sm font-bold text-foreground">Upload Resume (Optional)</p>
+                          <p className="text-xs text-muted-foreground mt-1 font-medium">PDF, DOCX up to 5MB</p>
                         </div>
                       </div>
                     </div>
@@ -221,16 +223,16 @@ function SignUp() {
 
               {/* Submit Button */}
               <div className="pt-4">
-                <Button type="submit" className="w-full h-14 relative overflow-hidden rounded-xl gradient-primary border-0 text-white shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(var(--indigo-rgb),0.5)] group text-lg font-medium">
+                <Button type="submit" className="w-full h-14 relative overflow-hidden rounded-xl gradient-primary border-0 text-white shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(10,102,194,0.4)] group text-lg font-medium cursor-pointer">
                   <span className="relative z-10 flex items-center gap-2">
                     Complete Registration
                     <ArrowRight className="h-5 w-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all" />
                   </span>
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl" />
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl pointer-events-none" />
                 </Button>
-                <p className="mt-6 text-center text-sm text-[#5B6475] font-medium">
+                <p className="mt-6 text-center text-sm text-muted-foreground font-medium">
                   Already have an account?{" "}
-                  <Link to="/login" className="text-[var(--indigo)] font-bold hover:text-[var(--purple)] transition-colors">
+                  <Link to="/login" className="text-primary font-bold hover:text-primary-hover transition-colors">
                     Sign in here
                   </Link>
                 </p>

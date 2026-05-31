@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { api } from "../services/api";
+import { useAuthStore } from "./useAuthStore";
 
 export interface CandidateData {
+  name: string;
+  email: string;
+  role: string;
   skills: Array<{ 
     name: string; 
     conf: number; 
@@ -53,7 +57,10 @@ interface ProfileState {
 const mapBackendToFrontendData = (
   extractedSkillsResp: any,
   validateResp: any,
-  analysisResp: any
+  analysisResp: any,
+  authUserName?: string,
+  authUserEmail?: string,
+  authUserRole?: string
 ): CandidateData => {
   const exSkills = extractedSkillsResp?.skills || [];
   const valSkills = validateResp?.validated_skills || [];
@@ -91,7 +98,17 @@ const mapBackendToFrontendData = (
   const matchedRoles = analysisResp?.matched_roles || [];
   const topMatch = matchedRoles[0];
 
+  // Priority: auth user name > backend response name > fallback
+  const name = authUserName || analysisResp?.name || "Unknown User";
+  const email = authUserEmail || analysisResp?.email || "unknown@example.com";
+  const role = authUserRole || analysisResp?.role || topMatch?.role || "Software Engineer";
+
+  console.log('[ProfileStore] mapBackendToFrontendData — name:', name, '| email:', email, '| role:', role);
+
   return {
+    name,
+    email,
+    role,
     skills: frontendSkills,
     radar: frontendSkills.slice(0, 6).map((s: any) => ({ skill: s.name, v: s.conf })),
     activity: Array.from({ length: 26 }, (_, i) => ({
@@ -132,12 +149,16 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     const { profileUrl } = get();
     if (!profileUrl) return;
 
+    // Read auth user at submission time (single source of truth)
+    const authUser = useAuthStore.getState().user;
+    console.log('[ProfileStore] submitProfile — authUser:', authUser);
+
     set({ status: "loading", error: null, currentStep: "Ingesting profile data..." });
 
     try {
       // Step 1: Ingest Github Profile
       const ingestionRes = await api.ingestGithubProfile(profileUrl);
-      const userId = ingestionRes?.user_id || "req_" + Math.random().toString(36).substring(2, 9);
+      const userId = ingestionRes?.user_id || authUser?.id || "req_" + Math.random().toString(36).substring(2, 9);
       set({ userId });
       const ingestedData = ingestionRes?.items || [ingestionRes];
 
@@ -156,13 +177,35 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const scorePayload = { user_id: userId, validated_skills: validatedSkills };
       await api.calculateScore(scorePayload);
 
-      // Step 5: Profile Analysis
+      // Step 5: Profile Analysis — pass auth user's name/email/role so backend persists them
       set({ currentStep: "Generating recruiter insights & matches..." });
-      const analysisRes = await api.analyzeProfile({ user_id: userId, validated_skills: validatedSkills });
+      const analysisPayload: any = {
+        user_id: userId,
+        validated_skills: validatedSkills,
+      };
 
-      // Transform data
-      const mappedData = mapBackendToFrontendData(extractRes, validateRes, analysisRes);
+      // Inject auth user identity into the payload so backend can persist real name
+      if (authUser) {
+        analysisPayload.name = authUser.name;
+        analysisPayload.email = authUser.email;
+        analysisPayload.role = authUser.role;
+      }
 
+      console.log('[ProfileStore] analyzeProfile payload name:', analysisPayload.name);
+      const analysisRes = await api.analyzeProfile(analysisPayload);
+      console.log('[ProfileStore] analyzeProfile response:', analysisRes);
+
+      // Transform data — always use auth user identity as primary source
+      const mappedData = mapBackendToFrontendData(
+        extractRes,
+        validateRes,
+        analysisRes,
+        authUser?.name,
+        authUser?.email,
+        authUser?.role
+      );
+
+      console.log('[ProfileStore] Final mapped data name:', mappedData.name);
       set({ status: "success", data: mappedData, currentStep: "" });
 
     } catch (err: any) {

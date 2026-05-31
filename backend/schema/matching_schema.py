@@ -39,6 +39,9 @@ class ProfileExplanation(BaseModel):
 
 class CombinedAnalysisResponse(BaseModel):
     user_id: str
+    name: Optional[str] = "Unknown User"
+    email: Optional[str] = "unknown@example.com"
+    role: Optional[str] = "Software Engineer"
     score: CandidateScore
     matched_roles: List[MatchedRole]
     graph: GraphStructure

@@ -46,19 +46,19 @@ function Nav() {
           </div>
           <span className="text-sm font-semibold">TrueSkill AI</span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium text-[#334155] md:flex">
-          <a href="#features" className="hover:text-[#1E1B4B] transition-colors">Features</a>
-          <a href="#workflow" className="hover:text-[#1E1B4B] transition-colors">Workflow</a>
-          <a href="#why" className="hover:text-[#1E1B4B] transition-colors">Why us</a>
-          <a href="#testimonials" className="hover:text-[#1E1B4B] transition-colors">Customers</a>
+        <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
+          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+          <a href="#workflow" className="hover:text-foreground transition-colors">Workflow</a>
+          <a href="#why" className="hover:text-foreground transition-colors">Why us</a>
+          <a href="#testimonials" className="hover:text-foreground transition-colors">Customers</a>
         </nav>
         <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:flex text-[#334155] hover:text-[#1E1B4B] font-bold transition-colors hover:bg-black/5">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:flex text-muted-foreground hover:text-foreground font-bold transition-colors hover:bg-accent">
             <Link to="/login">Log in</Link>
           </Button>
           <div className="relative group">
-            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#9333EA] opacity-40 blur group-hover:opacity-70 transition duration-500" />
-            <Button asChild size="sm" className="relative flex items-center overflow-hidden rounded-full border-0 text-white shadow-xl transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]" style={{ background: 'linear-gradient(135deg, #4F46E5, #9333EA)' }}>
+            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#0A66C2] to-[#004182] opacity-40 blur group-hover:opacity-70 transition duration-500" />
+            <Button asChild size="sm" className="relative flex items-center overflow-hidden rounded-full border-0 text-white shadow-xl transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(10,102,194,0.4)]" style={{ background: 'linear-gradient(135deg, #0A66C2, #004182)' }}>
               <Link to="/signup">
                 <span className="relative z-10 flex items-center gap-1.5 font-bold">
                   Sign up <ArrowRight className="h-3.5 w-3.5" />
@@ -137,7 +137,7 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="mt-6 text-5xl font-bold tracking-tight text-[#1E1B4B] md:text-7xl"
+            className="mt-6 text-5xl font-bold tracking-tight text-foreground md:text-7xl"
           >
             Beyond Resumes.<br />
             <span className="gradient-text">Discover Real Skills.</span>
@@ -147,7 +147,7 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="mx-auto mt-6 max-w-2xl text-lg text-[#5B6475] font-medium"
+            className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground font-medium"
           >
             TrueSkill AI analyzes GitHub activity, coding profiles, certifications, and project intelligence
             to build verified AI-powered skill credibility scores.
@@ -165,7 +165,7 @@ function Landing() {
                 <div className="absolute inset-0 bg-white/20 translate-y-full hover:translate-y-0 transition-transform duration-300" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-white/10 bg-white/5 backdrop-blur hover:bg-white/10 transition-colors">
+            <Button asChild size="lg" variant="outline" className="border-border bg-card/45 backdrop-blur hover:bg-card/60 transition-colors">
               <Link to="/login">Recruit Talent</Link>
             </Button>
           </motion.div>
@@ -191,17 +191,17 @@ function Landing() {
                   <motion.div
                     key={idx}
                     whileHover={{ scale: 1.02, y: -5 }}
-                    className="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 p-1 backdrop-blur-2xl transition-all duration-300 shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_15px_50px_rgba(var(--indigo-rgb),0.15)] hover:border-white/60"
+                    className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 p-1 backdrop-blur-2xl transition-all duration-300 shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_15px_50px_rgba(var(--primary-rgb),0.15)] hover:border-border"
                   >
                     {/* Animated gradient border effect on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--indigo)]/10 via-[var(--cyan)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 via-[var(--cyan)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
-                    <div className="relative flex h-full items-center gap-4 rounded-xl bg-gradient-to-br from-white/50 to-transparent p-5 border border-white/20">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/80 border border-white/40 shadow-sm group-hover:bg-white transition-colors">
+                    <div className="relative flex h-full items-center gap-4 rounded-xl bg-gradient-to-br from-card/50 to-transparent p-5 border border-border/20">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card/85 border border-border/40 shadow-sm group-hover:bg-card transition-colors">
                         <card.icon className="h-6 w-6" style={{ color: card.color }} />
                       </div>
                       <div className="text-left">
-                        <h3 className="font-bold text-[#24304A] tracking-tight">{card.title}</h3>
+                        <h3 className="font-bold text-foreground tracking-tight">{card.title}</h3>
                         <div className="mt-2 h-1 w-24 overflow-hidden rounded-full bg-black/5 shadow-inner">
                           <motion.div
                             initial={{ width: 0 }}
@@ -226,7 +226,7 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-bold text-[var(--indigo)] uppercase tracking-widest">Capabilities</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#1E1B4B] md:text-4xl">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
               An end-to-end intelligence layer for hiring
             </h2>
           </div>
@@ -238,13 +238,13 @@ function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="group rounded-2xl border bg-card p-6 transition hover:border-[var(--indigo)]/50 hover:elegant-shadow"
+                className="group rounded-2xl border bg-card p-6 transition hover:border-[var(--primary)]/50 hover:elegant-shadow"
               >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--indigo)]/15 to-[var(--purple)]/15">
-                  <f.icon className="h-5 w-5 text-[var(--indigo)]" />
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--primary)]/15 to-[var(--primary-hover)]/15">
+                  <f.icon className="h-5 w-5 text-[var(--primary)]" />
                 </div>
-                <h3 className="font-bold text-[#24304A]">{f.title}</h3>
-                <p className="mt-1 text-sm text-[#5B6475] font-medium leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-foreground">{f.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground font-medium leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>

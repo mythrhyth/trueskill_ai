@@ -92,12 +92,15 @@ function JobsPage() {
     api.getCandidates()
       .then((data) => {
         if (isMounted) {
-          const mappedList = (data || []).map((c: any) => ({
-            candidate_id: c.candidate_id,
-            name: c.name || "Unknown Candidate",
-            score: Math.round((c.score || 0) * 10),
-            top_skills: c.top_skills || [],
-          }));
+          const mappedList = (data || []).map((c: any) => {
+            const name = !c.name || c.name.startsWith("req_") ? "Unknown User" : c.name;
+            return {
+              candidate_id: c.candidate_id,
+              name: name,
+              score: Math.round((c.score || 0) * 10),
+              top_skills: c.top_skills || [],
+            };
+          });
           setCandidatesList(mappedList);
           setLoadingCandidates(false);
           // Auto-select the first candidate if available
