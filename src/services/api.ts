@@ -12,6 +12,17 @@ export const api = {
     return response.data;
   },
 
+  uploadResume: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post("/ingestion/resume-upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
   extractSkills: async (userId: string, data: any) => {
     const response = await apiClient.post("/skill_extractor/extract", {
       user_id: userId,

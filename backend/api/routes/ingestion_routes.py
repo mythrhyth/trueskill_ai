@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from pydantic import BaseModel
+import shutil
+import tempfile
+import os
 
 from backend.services.ingestion.cp_parser import parse_cp_profile
 from backend.services.ingestion.doc_parser import parse_document
@@ -68,6 +71,30 @@ async def ingest_research(payload: UrlRequest):
 async def ingest_resume(payload: PathRequest):
     try:
         return parse_resume(payload.path)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/resume-upload", response_model=dict)
+async def ingest_resume_upload(file: UploadFile = File(...)):
+    try:
+        suffix = os.path.splitext(file.filename)[1].lower()
+        if suffix not in {".pdf", ".docx", ".txt", ".md"}:
+            raise ValueError(f"Unsupported resume file format: {suffix}")
+            
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+        
+        try:
+            result = parse_resume(tmp_path)
+            # Override id and title with real filename
+            result['id'] = f"resume:{file.filename}"
+            result['content']['title'] = file.filename
+            return result
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

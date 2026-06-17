@@ -48,8 +48,10 @@ interface ProfileState {
   data: CandidateData | null;
   profileUrl: string;
   userId: string | null;
+  resumeFile: File | null;
 
   setProfileUrl: (url: string) => void;
+  setResumeFile: (file: File | null) => void;
   submitProfile: () => Promise<void>;
   reset: () => void;
 }
@@ -74,11 +76,11 @@ const mapBackendToFrontendData = (
       conf: Math.round((s.confidence || 0) * 100),
       auth: Math.round((validatedScore || 0) * 100),
       isFraud: valSkill ? !!valSkill.is_fraud : false,
-      sources: (s.sources || []).map((src: any) => src.source || src),
+      sources: (valSkill?.sources || s.sources || []).map((src: any) => src.source || src),
       reasoning: valSkill?.explanations?.reasoning || s.evidence?.reasoning || "Extracted from source.",
       evidence: s.evidence?.items || valSkill?.explanations?.contributing_sources || [],
-      activeMonths: s.evidence?.active_months || Math.floor(Math.random() * 24) + 1,
-      repos: s.evidence?.repos_count || Math.floor(Math.random() * 10),
+      activeMonths: s.evidence?.active_months || 0,
+      repos: s.evidence?.repos_count || 0,
     };
   });
 
@@ -112,7 +114,7 @@ const mapBackendToFrontendData = (
     skills: frontendSkills,
     radar: frontendSkills.slice(0, 6).map((s: any) => ({ skill: s.name, v: s.conf })),
     activity: Array.from({ length: 26 }, (_, i) => ({
-      w: `W${i + 1}`, commits: 8 + Math.floor(Math.random() * 14),
+      w: `W${i + 1}`, commits: 0,
     })),
     breakdown,
     suggestions,
@@ -140,14 +142,16 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   data: null,
   profileUrl: "",
   userId: null,
+  resumeFile: null,
 
   setProfileUrl: (url) => set({ profileUrl: url }),
+  setResumeFile: (file) => set({ resumeFile: file }),
 
-  reset: () => set({ status: "idle", currentStep: "", error: null, data: null, profileUrl: "", userId: null }),
+  reset: () => set({ status: "idle", currentStep: "", error: null, data: null, profileUrl: "", userId: null, resumeFile: null }),
 
   submitProfile: async () => {
-    const { profileUrl } = get();
-    if (!profileUrl) return;
+    const { profileUrl, resumeFile } = get();
+    if (!profileUrl && !resumeFile) return;
 
     // Read auth user at submission time (single source of truth)
     const authUser = useAuthStore.getState().user;
@@ -156,11 +160,39 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     set({ status: "loading", error: null, currentStep: "Ingesting profile data..." });
 
     try {
-      // Step 1: Ingest Github Profile
-      const ingestionRes = await api.ingestGithubProfile(profileUrl);
-      const userId = ingestionRes?.user_id || authUser?.id || "req_" + Math.random().toString(36).substring(2, 9);
+      const ingestedData: any[] = [];
+      let userId = authUser?.id || "req_" + Math.random().toString(36).substring(2, 9);
+      let mainIngestionRes: any = null;
+
+      // Ingest Resume if uploaded
+      if (resumeFile) {
+        set({ currentStep: "Parsing uploaded resume..." });
+        const resumeIngestion = await api.uploadResume(resumeFile);
+        if (resumeIngestion) {
+          userId = resumeIngestion.user_id || userId;
+          const items = resumeIngestion.items || [resumeIngestion];
+          ingestedData.push(...items);
+          if (!mainIngestionRes) {
+            mainIngestionRes = resumeIngestion;
+          }
+        }
+      }
+
+      // Ingest GitHub Profile if input
+      if (profileUrl) {
+        set({ currentStep: "Ingesting GitHub profile..." });
+        const ingestionRes = await api.ingestGithubProfile(profileUrl);
+        mainIngestionRes = ingestionRes;
+        userId = ingestionRes?.user_id || userId;
+        const items = ingestionRes?.items || [ingestionRes];
+        ingestedData.push(...items);
+      }
+
+      if (ingestedData.length === 0) {
+        throw new Error("No data ingested. Please provide a GitHub URL or upload a resume.");
+      }
+
       set({ userId });
-      const ingestedData = ingestionRes?.items || [ingestionRes];
 
       // Step 2: Extract Skills
       set({ currentStep: "Extracting skills from profile..." });
@@ -168,7 +200,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       // Step 3: Validate Skills
       set({ currentStep: "Validating authenticity against sources..." });
-      const validateRes = await api.validateSkills(extractRes, ingestionRes);
+      const validationEvidence = mainIngestionRes || (ingestedData.length > 0 ? { items: ingestedData } : {});
+      const validateRes = await api.validateSkills(extractRes, validationEvidence);
       
       const validatedSkills = validateRes?.validated_skills || validateRes?.skills || extractRes?.skills || [];
 
@@ -183,6 +216,16 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         user_id: userId,
         validated_skills: validatedSkills,
       };
+
+      // Extract candidate name/email from mainIngestionRes (GitHub/resume parse response) if available
+      const parsedName = mainIngestionRes?.content?.name || mainIngestionRes?.name;
+      const parsedEmail = mainIngestionRes?.email || mainIngestionRes?.content?.email;
+      if (parsedName) {
+        analysisPayload.name = parsedName;
+      }
+      if (parsedEmail) {
+        analysisPayload.email = parsedEmail;
+      }
 
       // Inject auth user identity into the payload so backend can persist real name only if candidate
       if (authUser && authUser.role === 'candidate') {

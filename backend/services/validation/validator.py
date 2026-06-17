@@ -22,6 +22,8 @@ def validate_profile(extracted_skills_data: Dict[str, Any], raw_evidence_data: D
     """
     user_id = extracted_skills_data.get('user_id', 'unknown')
     raw_items = raw_evidence_data.get('items', [])
+    if not raw_items and isinstance(raw_evidence_data, dict) and raw_evidence_data.get('id'):
+        raw_items = [raw_evidence_data]
     skills = extracted_skills_data.get('skills', [])
     
     profile_summary = extracted_skills_data.get('profile_summary', {})
@@ -42,6 +44,50 @@ def validate_profile(extracted_skills_data: Dict[str, Any], raw_evidence_data: D
         skill_conf = skill.get('confidence', 0.5)
         sources = skill.get('sources', [])
         
+        # Resolve sources dynamically from raw items if not populated (e.g. in rule-based fallback)
+        if not sources and skill_name:
+            resolved_sources = []
+            from backend.utils.llm_service import SKILL_KEYWORDS
+            keywords = [skill_name.lower()]
+            if skill_name in SKILL_KEYWORDS:
+                keywords.extend([kw.lower() for kw in SKILL_KEYWORDS[skill_name]])
+            
+            for item in raw_items:
+                raw_text = ""
+                item_content = item.get("content")
+                if isinstance(item_content, dict):
+                    raw_text = (item_content.get("raw_text") or item_content.get("title") or item_content.get("description") or "").lower()
+                elif isinstance(item_content, str):
+                    raw_text = item_content.lower()
+                
+                tech_stack = item.get("attributes", {}).get("tech_stack", [])
+                tech_stack_lower = [s.lower() for s in tech_stack] if tech_stack else []
+                
+                matched = False
+                for kw in keywords:
+                    if kw in raw_text or kw in tech_stack_lower:
+                        matched = True
+                        break
+                
+                if not matched and item.get("type") == "github_profile":
+                    projects = item.get("attributes", {}).get("projects", [])
+                    for proj in projects:
+                        proj_text = (f"{proj.get('name') or ''} {proj.get('description') or ''} {proj.get('language') or ''}").lower()
+                        for kw in keywords:
+                            if kw in proj_text:
+                                matched = True
+                                break
+                        if matched:
+                            break
+                
+                if matched:
+                    resolved_sources.append({
+                        "item_id": item.get("id"),
+                        "source": item.get("source"),
+                        "type": item.get("type")
+                    })
+            sources = resolved_sources
+
         mapped_items = []
         source_types = set()
         
@@ -94,6 +140,7 @@ def validate_profile(extracted_skills_data: Dict[str, Any], raw_evidence_data: D
             'original_confidence': skill_conf,
             'validated_score': validated_score,
             'is_fraud': is_fraud,
+            'sources': sources,
             'explanations': explanations
         }
         validated_skills.append(validated_skill)

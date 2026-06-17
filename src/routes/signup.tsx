@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Mail, Lock, ArrowRight, Github, Chrome, User, Building, GraduationCap, Briefcase, Linkedin, UploadCloud } from "lucide-react";
+import { Brain, Mail, Lock, ArrowRight, Github, User, Building, GraduationCap, Briefcase, Linkedin, UploadCloud, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useProfileStore } from "@/store/useProfileStore";
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
@@ -15,7 +16,22 @@ export const Route = createFileRoute("/signup")({
 function SignUp() {
   const navigate = useNavigate();
   const [role, setRole] = useState<"candidate" | "recruiter">("candidate");
+  const [resumeFile, setResumeFileLocal] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const login = useAuthStore((s) => s.login);
+  const setResumeFile = useProfileStore((s) => s.setResumeFile);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setResumeFileLocal(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setResumeFileLocal(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,6 +42,13 @@ function SignUp() {
 
     console.log('[SignUp] Registering user:', { id, name, email, role });
     login({ id, name, email, role });
+
+    // If a resume was uploaded, store it in the profile store so
+    // the candidate page automatically picks it up and runs the pipeline
+    if (resumeFile && role === 'candidate') {
+      setResumeFile(resumeFile);
+    }
+
     navigate({ to: role === "candidate" ? "/candidate" : "/recruiter" });
   };
 
@@ -208,12 +231,45 @@ function SignUp() {
                             <Input id="linkedin" placeholder="linkedin.com/in/username" className="pl-10 h-12 bg-background/40 border-border text-foreground placeholder-muted-foreground focus-visible:ring-primary rounded-xl shadow-inner" />
                           </div>
                         </div>
-                        <div className="sm:col-span-2 mt-2 border border-dashed border-border rounded-xl p-6 bg-muted/40 hover:bg-muted/60 transition-colors flex flex-col items-center justify-center cursor-pointer group shadow-sm">
-                          <div className="h-12 w-12 rounded-full bg-background border border-border flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <UploadCloud className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
-                          <p className="text-sm font-bold text-foreground">Upload Resume (Optional)</p>
-                          <p className="text-xs text-muted-foreground mt-1 font-medium">PDF, DOCX up to 5MB</p>
+                        <div className="sm:col-span-2 mt-2">
+                          {!resumeFile ? (
+                            <div
+                              onClick={() => fileInputRef.current?.click()}
+                              className="relative border border-dashed border-border rounded-xl p-6 bg-muted/40 hover:bg-muted/60 hover:border-primary/50 transition-all flex flex-col items-center justify-center cursor-pointer group shadow-sm"
+                            >
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".pdf,.docx,.txt,.md"
+                                onChange={handleFileChange}
+                                className="hidden"
+                              />
+                              <div className="h-12 w-12 rounded-full bg-background border border-border flex items-center justify-center mb-3 group-hover:scale-110 group-hover:border-primary/40 transition-all">
+                                <UploadCloud className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                              </div>
+                              <p className="text-sm font-bold text-foreground">Upload Resume (Optional)</p>
+                              <p className="text-xs text-muted-foreground mt-1 font-medium">PDF, DOCX, TXT, MD up to 5MB</p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between p-4 rounded-xl border border-primary/30 bg-primary/5">
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                  <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="overflow-hidden">
+                                  <p className="text-sm font-semibold text-foreground truncate">{resumeFile.name}</p>
+                                  <p className="text-xs text-muted-foreground">{(resumeFile.size / 1024).toFixed(0)} KB · Ready to upload</p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemoveFile}
+                                className="ml-3 p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

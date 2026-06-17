@@ -16,7 +16,7 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta2/models/{GEMINI_MODEL}:generateText"
+GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 # Fallback skill database for rule-based extraction
 SKILL_KEYWORDS = {
@@ -51,13 +51,15 @@ def extract_skills_with_llm(text: str, hints: List[str] = None) -> List[Dict[str
     provider_order = ["gemini"]
 
     for provider in provider_order:
-        if provider == "gemini" and GEMINI_API_KEY:
+        if provider == "gemini" and GEMINI_API_KEY and GEMINI_API_KEY != "your-gemini-api-key":
             try:
                 skills = _extract_with_gemini(text, hints)
                 logger.info(f"Successfully extracted {len(skills)} skills using Gemini")
                 return skills
             except Exception as e:
                 logger.warning(f"Gemini extraction failed: {e}")
+        elif provider == "gemini" and (not GEMINI_API_KEY or GEMINI_API_KEY == "your-gemini-api-key"):
+            logger.info("GEMINI_API_KEY is not configured or using default placeholder. Skipping Gemini call.")
 
     logger.warning("No LLM provider available or all LLM calls failed, falling back to rule-based extraction")
     return _extract_with_rules(text, hints)
@@ -84,11 +86,12 @@ Return only valid JSON, no markdown.
 """
 
     payload = {
-        "prompt": {"text": prompt},
-        "temperature": 0.3,
-        "maxOutputTokens": 512,
-        "topP": 0.95,
-        "candidateCount": 1
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.3,
+            "maxOutputTokens": 512,
+            "topP": 0.95
+        }
     }
 
     response = requests.post(
@@ -118,19 +121,18 @@ def _parse_gemini_output(response_data: Dict[str, Any]) -> str:
         raise ValueError("Gemini response did not contain any candidates")
 
     candidate = candidates[0]
-    output = candidate.get("output")
-    if isinstance(output, str):
-        return output
-
-    if isinstance(output, dict):
-        content = output.get("content")
-        if isinstance(content, str):
-            return content
-
-        if isinstance(content, list):
-            for block in content:
-                if isinstance(block, dict) and block.get("type") == "output_text":
-                    return block.get("text", "")
+    content = candidate.get("content", {})
+    parts = content.get("parts", [])
+    if parts and isinstance(parts, list):
+        text_out = parts[0].get("text", "")
+        # Strip code block formatting if it is returned
+        if text_out.startswith("```json"):
+            text_out = text_out.replace("```json", "", 1)
+        if text_out.startswith("```"):
+            text_out = text_out.replace("```", "", 1)
+        if text_out.endswith("```"):
+            text_out = text_out.rsplit("```", 1)[0]
+        return text_out.strip()
 
     raise ValueError("Unable to extract text from Gemini response")
 
@@ -142,11 +144,12 @@ def _parse_gemini_output(response_data: Dict[str, Any]) -> str:
 def _call_gemini_text(prompt: str) -> str:
     """Call Gemini for a generic text response."""
     payload = {
-        "prompt": {"text": prompt},
-        "temperature": 0.3,
-        "maxOutputTokens": 512,
-        "topP": 0.95,
-        "candidateCount": 1
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.3,
+            "maxOutputTokens": 512,
+            "topP": 0.95
+        }
     }
 
     response = requests.post(
@@ -165,11 +168,13 @@ def run_agent_fallback(prompt: str) -> str:
     provider_order = ["gemini"]
 
     for provider in provider_order:
-        if provider == "gemini" and GEMINI_API_KEY:
+        if provider == "gemini" and GEMINI_API_KEY and GEMINI_API_KEY != "your-gemini-api-key":
             try:
                 return _call_gemini_text(prompt)
             except Exception as e:
                 logger.warning(f"Gemini fallback failed: {e}")
+        elif provider == "gemini" and (not GEMINI_API_KEY or GEMINI_API_KEY == "your-gemini-api-key"):
+            logger.info("GEMINI_API_KEY is not configured or using default placeholder. Skipping Gemini fallback call.")
 
     raise RuntimeError("No valid LLM provider available for agent fallback")
 

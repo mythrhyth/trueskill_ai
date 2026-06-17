@@ -22,7 +22,7 @@ def calculate_github_signal(items: List[Dict[str, Any]]) -> float:
     return (c_score * 0.5) + (s_score * 0.3) + (p_score * 0.2)
 
 def calculate_coding_signal(items: List[Dict[str, Any]]) -> float:
-    """Calculate aggregate coding signal from CP/Kaggle items."""
+    """Calculate aggregate coding signal from CP/Kaggle/resume items."""
     total_solved = 0
     max_rating = 0
     
@@ -33,6 +33,10 @@ def calculate_coding_signal(items: List[Dict[str, Any]]) -> float:
             total_solved += (metrics.get('total_solved', 0) or metrics.get('competitions', 0) or 0)
             rating = (metrics.get('contest_rating', 0) or metrics.get('followers', 0) or 0)
             max_rating = max(max_rating, rating)
+        elif 'resume' in item_type:
+            # Resume claim baseline
+            total_solved += 100
+            max_rating = max(max_rating, 1200)
             
     # Strong profile: 300 problems solved, 2500 rating
     s_score = min(1.0, total_solved / 300.0)
@@ -41,7 +45,7 @@ def calculate_coding_signal(items: List[Dict[str, Any]]) -> float:
     return (s_score * 0.6) + (r_score * 0.4)
 
 def calculate_course_signal(items: List[Dict[str, Any]]) -> float:
-    """Calculate aggregate course signal from certificates/courses."""
+    """Calculate aggregate course signal from certificates/courses/resumes."""
     total_courses = 0
     total_duration = 0
     
@@ -51,6 +55,9 @@ def calculate_course_signal(items: List[Dict[str, Any]]) -> float:
             total_courses += 1
             metrics = item.get('metrics', {})
             total_duration += (metrics.get('duration_hours', 0) or 0)
+        elif 'resume' in item_type:
+            total_courses += 1
+            total_duration += 40  # 40 hours baseline duration for resume proof
             
     # Strong profile: 5 courses, 100 hours
     c_score = min(1.0, total_courses / 5.0)

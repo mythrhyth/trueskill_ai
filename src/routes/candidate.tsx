@@ -7,7 +7,8 @@ import {
 import { 
   Github, Trophy, ShieldCheck, BadgeCheck, Sparkles, TrendingUp, Code2, Cpu, 
   Search, AlertCircle, RefreshCcw, CheckCircle2, Linkedin, Check, X,
-  ArrowRight, Briefcase, PlusCircle, MinusCircle, Shield, Clock, Activity, Network, Brain
+  ArrowRight, Briefcase, PlusCircle, MinusCircle, Shield, Clock, Activity, Network, Brain,
+  Upload, FileText
 } from "lucide-react";
 import { PageHeader, StatCard, GlassCard, ScoreRing } from "@/components/ui-kit/Primitives";
 import { Badge } from "@/components/ui/badge";
@@ -283,9 +284,37 @@ function SkillCard({ skill, index, onOpenModal }: { skill: any, index: number, o
 }
 
 function CandidatePage() {
-  const { status, currentStep, error, data, profileUrl, setProfileUrl, submitProfile, reset } = useProfileStore();
+  const { 
+    status, 
+    currentStep, 
+    error, 
+    data, 
+    profileUrl, 
+    setProfileUrl, 
+    resumeFile, 
+    setResumeFile, 
+    submitProfile, 
+    reset 
+  } = useProfileStore();
   const { user } = useAuthStore();
   const [selectedSkill, setSelectedSkill] = useState<any>(null);
+
+  // Auto-submit if the user arrives from signup with a resume already stored
+  useEffect(() => {
+    if (status === 'idle' && resumeFile && !profileUrl) {
+      submitProfile();
+    }
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setResumeFile(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setResumeFile(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -302,29 +331,64 @@ function CandidatePage() {
             className="flex min-h-[80vh] items-center justify-center p-6"
           >
             <div className="w-full max-w-md">
-              <GlassCard className="p-8 text-center elegant-shadow">
+              <GlassCard className="p-8 elegant-shadow">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--indigo)]/20 to-[var(--purple)]/20">
                   <Search className="h-8 w-8 text-[var(--indigo)]" />
                 </div>
-                <p className="text-sm font-medium text-[var(--indigo)] mb-2 tracking-wide uppercase">Welcome back, {user?.name?.split(' ')[0] || 'Candidate'}</p>
-                <h1 className="mb-2 text-2xl font-semibold tracking-tight">Evidence-Backed Skill Verification</h1>
-                <p className="mb-8 text-sm text-muted-foreground">
-                  Enter a candidate's GitHub or LinkedIn profile to generate explainable hiring intelligence.
+                <p className="text-center text-sm font-medium text-[var(--indigo)] mb-2 tracking-wide uppercase">Welcome back, {user?.name?.split(' ')[0] || 'Candidate'}</p>
+                <h1 className="text-center mb-2 text-2xl font-semibold tracking-tight">Evidence-Backed Skill Verification</h1>
+                <p className="text-center mb-8 text-sm text-muted-foreground">
+                  Provide your GitHub profile URL, upload your resume (PDF, DOCX, TXT, MD), or both to generate explainable hiring intelligence.
                 </p>
                 <form 
                   onSubmit={(e) => { e.preventDefault(); submitProfile(); }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
-                  <Input 
-                    type="text" 
-                    placeholder="https://github.com/username" 
-                    value={profileUrl}
-                    onChange={(e) => setProfileUrl(e.target.value)}
-                    className="h-12 border-[var(--border)] bg-background/50 backdrop-blur"
-                  />
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">GitHub Profile (Option A)</label>
+                    <Input 
+                      type="text" 
+                      placeholder="https://github.com/username" 
+                      value={profileUrl}
+                      onChange={(e) => setProfileUrl(e.target.value)}
+                      className="h-12 border-[var(--border)] bg-background/50 backdrop-blur"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resume File (Option B)</label>
+                    
+                    {!resumeFile ? (
+                      <div className="relative border border-dashed border-muted-foreground/30 rounded-xl p-6 hover:border-[var(--indigo)]/50 transition-colors bg-background/30 flex flex-col items-center justify-center cursor-pointer">
+                        <input
+                          type="file"
+                          accept=".pdf,.docx,.txt,.md"
+                          onChange={handleFileChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <Upload className="h-8 w-8 text-muted-foreground/60 mb-2" />
+                        <span className="text-xs font-medium text-muted-foreground">Upload PDF, DOCX, TXT or MD</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 rounded-xl border bg-[var(--indigo)]/5 border-[var(--indigo)]/20">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <FileText className="h-5 w-5 text-[var(--indigo)] shrink-0" />
+                          <span className="text-xs font-medium text-foreground truncate">{resumeFile.name}</span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={handleRemoveFile}
+                          className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <Button 
                     type="submit" 
-                    disabled={!profileUrl.trim()} 
+                    disabled={!profileUrl.trim() && !resumeFile} 
                     className="h-12 w-full gradient-primary border-0 text-white transition-all hover:opacity-90 glow"
                   >
                     Generate Intelligence
